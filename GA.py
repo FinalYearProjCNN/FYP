@@ -21,8 +21,10 @@ class GeneticAlgorithm:
         self.learning_rate = learning_rate
         self.rate_of_decay = rate_of_decay
         self.num_epochs = num_epochs
+        self.population = []
 
     # Define the fitness function
+
     def fitness(self, rate_of_decay, num_epochs, learning_rate):
         with open('generators.pickle', 'rb') as f:
             train_generator, test_generator, validation_generator = pickle.load(
@@ -68,7 +70,9 @@ class GeneticAlgorithm:
     def random_genotype(self):
         return (self.random_rate_of_decay(), self.random_num_epochs(), self.random_learning_rate())
 
-    population = [self.random_genotype() for _ in range(POPULATION_SIZE)]
+    def initialize_population(self):
+        self.population = [self.random_genotype()
+                           for _ in range(self.POPULATION_SIZE)]
 
     def crossover(self, parent1, parent2):
         RATE_OF_DECAY_LENGTH = 10
@@ -123,49 +127,52 @@ class GeneticAlgorithm:
         return selected_parents
 
     # Define the main loop
-    GENERATIONS = 25
-    POPULATION_SIZE = 100
-    for i in range(GENERATIONS):
-        # Select survivors
-        selected_survivors = random.sample(population, k=POPULATION_SIZE)
+    def main(self):
+        GENERATIONS = 25
+        POPULATION_SIZE = 100
+        MUTATION_PROBABILITY = 0.1
+        for i in range(GENERATIONS):
+            # Select survivors
+            selected_survivors = random.sample(
+                self.population, k=POPULATION_SIZE)
 
-        # Generate new population through crossover and mutation
-        new_population = []
-        fitness_values = []
-        while len(new_population) < POPULATION_SIZE:
-            MUTATION_PROBABILITY = 0.1
-            # Select two parents randomly
-            parent1, parent2 = random.sample(selected_survivors, 2)
+            # Generate new population through crossover and mutation
+            new_population = []
+            fitness_values = []
+            while len(new_population) < POPULATION_SIZE:
+                # Select two parents randomly
+                parent1, parent2 = random.sample(selected_survivors, 2)
 
-            # Perform crossover to create offspring
-            offspring = crossover(self, parent1, parent2)
+                # Perform crossover to create offspring
+                offspring = self.crossover(parent1, parent2)
 
-            # Mutate offspring
-            mutated_offspring = mutate(self, offspring, MUTATION_PROBABILITY)
+                # Mutate offspring
+                mutated_offspring = self.mutate(
+                    offspring, MUTATION_PROBABILITY)
 
-            # Add mutated offspring to new population
-            new_population.append(mutated_offspring)
+                # Add mutated offspring to new population
+                new_population.append(mutated_offspring)
 
-    # Replace old population with new population
-    population = new_population
+        # Replace old population with new population
+        population = new_population
 
-    # Evaluate fitness of new population
-    fitness_values = [self.fitness(rate_of_decay, num_epochs, learning_rate)
-                      for rate_of_decay, num_epochs, learning_rate in population]
+        # Evaluate fitness of new population
+        fitness_values = [self.fitness(rate_of_decay, num_epochs, learning_rate)
+                          for rate_of_decay, num_epochs, learning_rate in population]
 
-    # Get the best genotype and its fitness
-    best_genotype, best_fitness = None, -float('inf')
-    for genotype, fitness_value in zip(population, fitness_values):
-        if fitness_value is not None and fitness_value > best_fitness:
-            best_genotype = genotype
-            best_fitness = fitness_value
+        # Get the best genotype and its fitness
+        best_genotype, best_fitness = None, -float('inf')
+        for genotype, fitness_value in zip(population, fitness_values):
+            if fitness_value is not None and fitness_value > best_fitness:
+                best_genotype = genotype
+                best_fitness = fitness_value
 
-        # Print the best genotype and its fitness
-        print(
-            f"Generation {i + 1}: Best genotype = {best_genotype}, Best fitness = {best_fitness}")
+            # Print the best genotype and its fitness
+            print(
+                f"Generation {i + 1}: Best genotype = {best_genotype}, Best fitness = {best_fitness}")
 
-        if best_genotype is not None:
-            rate_of_decay, num_epochs, learning_rate = best_genotype
-            print("Optimal rate of decay:", rate_of_decay)
-            print("Optimal learning rate:", learning_rate)
-            print("Optimal number of epochs:", num_epochs)
+            if best_genotype is not None:
+                rate_of_decay, num_epochs, learning_rate = best_genotype
+                print("Optimal rate of decay:", rate_of_decay)
+                print("Optimal learning rate:", learning_rate)
+                print("Optimal number of epochs:", num_epochs)
