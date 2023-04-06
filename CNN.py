@@ -11,6 +11,7 @@ from keras.applications import ResNet50
 import seaborn as sn
 from sklearn.model_selection import train_test_split
 import skimage.io
+from sklearn import metrics
 import keras.backend as K
 import keras
 import keras.layers as layers
@@ -72,10 +73,6 @@ def load_data():
         class_mode='categorical')
 
 
-with open('generators.pickle', 'wb') as f:
-    pickle.dump((train_generator, test_generator, validation_generator), f)
-
-
 def f1_score(y_true, y_pred):
     true_positives = K.sum(K.round(K.clip(y_true * y_pred, 0, 1)))
     possible_positives = K.sum(K.round(K.clip(y_true, 0, 1)))
@@ -120,7 +117,7 @@ def define_model():
     model.compile(optimizers.Adam(learning_rate=0.0001,
                   decay=1e-4), loss='MSE', metrics=METRICS)
     model.summary()
-    model.save('mymodel.h5')
+    model.save('/mymodel.h5')
 
 
 def train_model():
@@ -130,7 +127,9 @@ def train_model():
                           min_delta=0.0001, patience=20, mode='auto')
     lrd = ReduceLROnPlateau(monitor='val_loss', patience=20,
                             verbose=1, factor=0.50, min_lr=1e-10)
+
     prediction = model.predict(validation_generator)
+
     hist = model.fit(train_generator,
                      validation_data=validation_generator,
                      epochs=5,
@@ -195,8 +194,6 @@ Train_Val_Plot(hist.history['accuracy'], hist.history['val_accuracy'],
 y_pred = model.predict(test_generator)
 print(y_pred)
 
-# %%
-
 
 def plot_confusion_matrix(y_true, y_pred, classes,
                           normalize=False,
@@ -213,9 +210,7 @@ def plot_confusion_matrix(y_true, y_pred, classes,
             title = 'Confusion matrix, without normalization'
 
     # Compute confusion matrix
-    cm = confusion_matrix(y_true, y_pred)
-    # Only use the labels that appear in the data
-    classes = classes
+    cm = metrics.confusion_matrix(y_true, y_pred)
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
         # print("Normalized confusion matrix")
@@ -252,7 +247,4 @@ def plot_confusion_matrix(y_true, y_pred, classes,
     return ax
 
 
-# Plot normalized confusion matrix
-plot_confusion_matrix(y_true, y_pred, classes=faces,
-                      normalize=True, title='Normalized confusion matrix')
 plt.show()
