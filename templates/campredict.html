@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang=eng>
+<head>
+    <title>Webcam Image Classifier</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="/Users/macair/FYP_TitoE/FYP/static/style.css">
+</head>
+<body>
+    <h1>Webcam Image Classifier</h1>
+    <video id="video" width="640" height="480" autoplay></video>
+    <canvas id="canvas" width="640" height="480"></canvas>
+    <div id="result"></div>
+    <script>
+        // Access webcam and capture video frames
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                const video = document.getElementById('video');
+                video.srcObject = stream;
+                video.addEventListener('play', () => {
+                    const canvas = document.getElementById('canvas');
+                    const context = canvas.getContext('2d');
+                    setInterval(() => {
+                        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                        const frame = canvas.toDataURL('image/jpeg');
+                        // Send video frame to the server for inference
+                        $.post('/predict', { frame: frame }, (response) => {
+                            // Update the web page with the predicted label and confidence
+                            const resultDiv = document.getElementById('result');
+                            resultDiv.innerHTML = `Predicted Label: ${response.label}<br>Confidence: ${response.confidence}`;
+                        });
+                    }, 1000); // Adjust the interval value as needed
+                });
+            })
+            .catch(error => console.error('Error accessing webcam:', error));
+    </script>
+</body>
+</html>

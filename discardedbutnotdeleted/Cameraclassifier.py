@@ -1,5 +1,4 @@
 import import_ipynb
-from CNN import saved_model
 from tkinter import messagebox
 import tkinter as tk
 import matplotlib.pyplot as plt
@@ -12,10 +11,7 @@ from keras.models import model_from_json
 from keras.models import Sequential, save_model, load_model
 from cwarning import show_warning
 
-model = keras.Sequential()
-filename = "./Completed_model"
-save_model(model, filename)
-loaded_model = keras.models.load_model(filename)
+model = load_model('mymodel.h5')
 
 model_json = model.to_json()
 model.save_weights('model_weights.h5')
@@ -42,7 +38,7 @@ class FacialExpressionModel(object):
 
 
 facec = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
-model = FacialExpressionModel("model.json", "model_weights.h5")
+model = FacialExpressionModel("model.json", "mymodel.h5")
 font = cv2.FONT_HERSHEY_SIMPLEX
 
 
