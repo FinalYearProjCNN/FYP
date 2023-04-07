@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang=eng>
+<head>
+    <title>About</title>
+    <link rel="stylesheet" href="/Users/macair/FYP_TitoE/FYP/static/style.css">
+</head>
+<body>
+    <h1>About</h1>
+    <h2>Borderline Personality Disorder (BPD) Symptoms:</h2>
+    <ul>
+        {% for symptom in bpd_symptoms %}
+        <li>{{ symptom }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Obsessive-Compulsive Disorder (OCD) Symptoms:</h2>
+    <ul>
+        {% for symptom in ocd_symptoms %}
+        <li>{{ symptom }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Anxiety Disorder Symptoms:</h2>
+    <ul>
+        {% for symptom in anxiety_symptoms %}
+        <li>{{ symptom }}</li>
+        {% endfor %}
+    </ul>
+    <h2>Depression Symptoms:</h2>
+    <ul>
+        {% for symptom in depression_symptoms %}
+        <li>{{ symptom }}</li>
+        {% endfor %}
+    </ul>
